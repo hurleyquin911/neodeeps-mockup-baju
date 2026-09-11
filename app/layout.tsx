@@ -17,6 +17,10 @@ export const metadata: Metadata = {
   title: "Studio Kaos — Editor Desain 3D",
   description:
     "Desain kaos dengan tools lengkap: teks, gambar, bentuk, layer, lalu generate pratinjau 3D sesuai ukuran baju asli.",
+  icons: {
+    icon: [{ url: "/icon.png", type: "image/png" }],
+    apple: [{ url: "/apple-icon.png", type: "image/png" }],
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

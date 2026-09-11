@@ -46,6 +46,8 @@ type EditorState = {
   showGuides: boolean;
   unit: Unit;
   leftTab: LeftTab;
+  leftPanelOpen: boolean;
+  inspectorOpen: boolean;
   brush: BrushSettings;
   editingTextId: string | null;
   studioOpen: boolean;
@@ -73,6 +75,10 @@ type EditorActions = {
   toggleGuides: () => void;
   setUnit: (unit: Unit) => void;
   setLeftTab: (tab: LeftTab) => void;
+  setLeftPanelOpen: (open: boolean) => void;
+  setInspectorOpen: (open: boolean) => void;
+  toggleLeftPanel: () => void;
+  toggleInspector: () => void;
   setShapeKind: (kind: ShapeKind) => void;
   setBrush: (patch: Partial<BrushSettings>) => void;
   setEditingTextId: (id: string | null) => void;
@@ -152,6 +158,8 @@ export const useEditor = create<EditorState & EditorActions>((set, get) => ({
   showGuides: true,
   unit: "cm",
   leftTab: "produk",
+  leftPanelOpen: true,
+  inspectorOpen: true,
   brush: { size: 0.45, color: "#111111", opacity: 1, tension: 0.35 },
   editingTextId: null,
   studioOpen: false,
@@ -202,20 +210,24 @@ export const useEditor = create<EditorState & EditorActions>((set, get) => ({
       };
     }),
 
-  setTool: (tool) =>
+  setTool: (tool) => {
+    const leftTab =
+      tool === "text"
+        ? "teks"
+        : tool === "image"
+          ? "unggah"
+          : tool === "shape"
+            ? "bentuk"
+            : tool === "draw" || tool === "pen" || tool === "eraser"
+              ? "gambar"
+              : get().leftTab;
+    const opensPanel = leftTab !== get().leftTab || ["text", "image", "shape", "draw", "pen", "eraser"].includes(tool);
     set({
       tool,
-      leftTab:
-        tool === "text"
-          ? "teks"
-          : tool === "image"
-            ? "unggah"
-            : tool === "shape"
-              ? "bentuk"
-              : tool === "draw" || tool === "pen" || tool === "eraser"
-                ? "gambar"
-                : get().leftTab,
-    }),
+      leftTab,
+      leftPanelOpen: opensPanel ? true : get().leftPanelOpen,
+    });
+  },
   setView: (view) => set({ view, selectedIds: [], editingTextId: null }),
   setSize: (size) => {
     get().commit();
@@ -236,8 +248,12 @@ export const useEditor = create<EditorState & EditorActions>((set, get) => ({
   toggleSnap: () => set((s) => ({ snap: !s.snap })),
   toggleGuides: () => set((s) => ({ showGuides: !s.showGuides })),
   setUnit: (unit) => set({ unit }),
-  setLeftTab: (leftTab) => set({ leftTab }),
-  setShapeKind: (shapeKind) => set({ shapeKind, tool: "shape", leftTab: "bentuk" }),
+  setLeftTab: (leftTab) => set({ leftTab, leftPanelOpen: true }),
+  setLeftPanelOpen: (leftPanelOpen) => set({ leftPanelOpen }),
+  setInspectorOpen: (inspectorOpen) => set({ inspectorOpen }),
+  toggleLeftPanel: () => set((s) => ({ leftPanelOpen: !s.leftPanelOpen })),
+  toggleInspector: () => set((s) => ({ inspectorOpen: !s.inspectorOpen })),
+  setShapeKind: (shapeKind) => set({ shapeKind, tool: "shape", leftTab: "bentuk", leftPanelOpen: true }),
   setBrush: (patch) => set((s) => ({ brush: { ...s.brush, ...patch } })),
   setEditingTextId: (editingTextId) => set({ editingTextId }),
 
